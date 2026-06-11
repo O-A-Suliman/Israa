@@ -1,5 +1,6 @@
 import React, { useState, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import backgroundImage from './assets/hero.png';
 import { Leaf, Snowflake, Footprints, PenTool, Home, Play, Pause, Quote, Heart, Sparkles } from 'lucide-react';
 
 // --- حركات الدخول ---
@@ -207,8 +208,19 @@ const CombinedQuiz = () => {
 };
 
 export default function App() {
+  // حالة لمعرفة هل بدأنا التصفح ولا لسة
+  const [isStarted, setIsStarted] = useState(false); 
   const [isPlaying, setIsPlaying] = useState(false);
   const audioRef = useRef(null);
+
+  // دالة تشغيل الموقع والموسيقى لما نضغط على الزر
+  const handleStart = () => {
+    setIsStarted(true);
+    if (audioRef.current) {
+      audioRef.current.play();
+      setIsPlaying(true);
+    }
+  };
 
   const toggleMusic = () => {
     if (isPlaying) audioRef.current.pause();
@@ -239,6 +251,42 @@ export default function App() {
     { trait: "قبول رهيب", emoji: "🌟" }
   ];
 
+  // ==========================================
+  // 1. صفحة البداية (تظهر فقط لو isStarted = false)
+  // ==========================================
+  if (!isStarted) {
+    return (
+      <div 
+        className="min-h-screen w-full bg-cover bg-center bg-no-repeat flex justify-center items-center font-arabic relative"
+        style={{ backgroundImage: `url(${backgroundImage})` }}
+        dir="rtl"
+      >
+        {/* طبقة شفافة لتوضيح النص فوق الصورة */}
+        <div className="absolute inset-0 bg-white/20 backdrop-blur-[2px]"></div>
+
+        <div className="relative z-10 bg-white/70 backdrop-blur-md p-8 md:p-12 rounded-[2rem] shadow-2xl max-w-2xl text-center border border-white/50 mx-4">
+          <h1 className="text-3xl md:text-5xl text-[#ff7aa3] font-bold mb-8 leading-relaxed">
+            أهلاً بكِ في مكانكِ الخاص.. <br/> حيث كل تفصيلة هنا صُممت لتشبه رقتكِ وجمالكِ ✨
+          </h1>
+          <button 
+            onClick={handleStart}
+            className="bg-[#ff7aa3] hover:bg-[#e91e63] text-white text-xl md:text-2xl font-bold py-4 px-10 rounded-full shadow-[0_4px_15px_rgba(255,122,163,0.4)] transition-all duration-300 hover:scale-105"
+          >
+            الى اجمل بت في العالم
+          </button>
+          
+          {/* عنصر الموسيقى مخفي هنا عشان يتحمل ويكون جاهز */}
+          <audio ref={audioRef} loop>
+            <source src="/river-flows.mp3" type="audio/mpeg" />
+          </audio>
+        </div>
+      </div>
+    );
+  }
+
+  // ==========================================
+  // 2. باقي صفحات الموقع (تظهر بمجرد الضغط على الزر)
+  // ==========================================
   return (
     <div className="text-[#4a4a4a] font-arabic selection:bg-[#fff0f5] selection:text-[#ff7aa3] relative" dir="rtl">
       <DreamyBackground />
@@ -254,7 +302,7 @@ export default function App() {
         {isPlaying ? <Pause size={20} /> : <Play size={20} />}
       </button>
 
-      {/* 1. القسم الافتتاحي */}
+      {/* القسم الافتتاحي */}
       <Section>
         <motion.div
           initial={{ opacity: 0, scale: 0.9 }}
@@ -275,7 +323,7 @@ export default function App() {
         </GlassCard>
       </Section>
 
-      {/* 2. قسم "صبو يا صبو" (من الصورة الأولى) */}
+      {/* قسم صبو يا صبو */}
       <Section>
         <div className="text-center mb-10 flex items-center justify-center gap-4">
           <Heart className="text-[#ff7aa3] fill-[#ff7aa3]" size={36} />
@@ -284,9 +332,9 @@ export default function App() {
         </div>
         
         <GlassCard className="max-w-2xl w-full bg-white/90">
-          <motion.ul variants={staggerContainer} className="space-y-6 text-xl md:text-2xl text-[#4a4a4a] font-semibold text-center">
+          <motion.ul className="space-y-6 text-xl md:text-2xl text-[#4a4a4a] font-semibold text-center">
             {saboTraits.map((trait, index) => (
-              <motion.li key={index} variants={fadeUp} className="flex items-center justify-center gap-3">
+              <motion.li key={index} className="flex items-center justify-center gap-3">
                 <span className="leading-relaxed">{trait}</span>
                 <span className="text-2xl">🌸</span>
               </motion.li>
@@ -295,7 +343,7 @@ export default function App() {
         </GlassCard>
       </Section>
 
-      {/* 3. قسم "جزء بسيط من جمال روحك" (من الصورة الثانية) */}
+      {/* قسم جمال الروح */}
       <Section>
         <div className="text-center mb-12">
           <h2 className="text-3xl md:text-4xl font-bold text-[#ff7aa3] flex items-center justify-center gap-2">
@@ -303,11 +351,10 @@ export default function App() {
           </h2>
         </div>
         
-        <motion.div variants={staggerContainer} className="grid grid-cols-2 md:grid-cols-3 gap-6 max-w-4xl w-full px-4">
+        <motion.div className="grid grid-cols-2 md:grid-cols-3 gap-6 max-w-4xl w-full px-4">
           {soulBeauty.map((item, index) => (
             <motion.div 
               key={index} 
-              variants={fadeUp} 
               className="bg-white rounded-3xl p-8 flex flex-col items-center justify-center gap-4 shadow-[0_4px_20px_rgba(255,182,193,0.15)] hover:shadow-[0_8px_30px_rgba(255,182,193,0.25)] transition-all duration-300 transform hover:-translate-y-1"
             >
               <span className="text-5xl">{item.emoji}</span>
@@ -317,7 +364,7 @@ export default function App() {
         </motion.div>
       </Section>
 
-      {/* 4. قسم الرسالة السودانية */}
+      {/* قسم الرسالة */}
       <Section>
         <GlassCard className="max-w-4xl text-center relative overflow-hidden bg-[#fff0f5]/40 border-pink-100">
           <Heart className="absolute top-4 right-4 text-[#ff7aa3]/20" size={80} />
@@ -332,7 +379,7 @@ export default function App() {
         </GlassCard>
       </Section>
 
-      {/* 5. قسم الغزل الرومانسي العميق */}
+      {/* قسم الغزل */}
       <Section>
         <div className="max-w-3xl text-center space-y-16">
           <Quote className="mx-auto text-[#ff7aa3]/50 mb-6" size={40} />
@@ -357,12 +404,12 @@ export default function App() {
         </div>
       </Section>
 
-      {/* 6. قسم الأسئلة المدمجة */}
+      {/* قسم الأسئلة */}
       <Section>
         <CombinedQuiz />
       </Section>
 
-      {/* 7. الخاتمة */}
+      {/* الخاتمة */}
       <Section className="pb-32">
         <div className="text-center">
           <motion.div
